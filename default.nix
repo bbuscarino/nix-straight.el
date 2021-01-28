@@ -1,4 +1,5 @@
-{ # Package set to build the Emacs environment from
+{
+  # Package set to build the Emacs environment from
   emacsPackages
   # Emacs package to use during build
 , emacs ? emacsPackages.emacs
@@ -7,20 +8,21 @@
   # Your `init.el` file to use for discovering and installing packages
 , emacsInitFile
   # Additional argument to pass to Emacs or your init file
-, emacsArgs ? []
+, emacsArgs ? [ ]
   # Additional files you wish to load prior to executing package discovery
   # Good place to place to call `advice-add` from
-, emacsLoadFiles ? []
+, emacsLoadFiles ? [ ]
   # Abort processing if a package not found in `emacsPackages`
   # Setting it to false will result in just skipping an unavailable package
-, abortOnNotFound ? true }:
-
+, abortOnNotFound ? true
+}:
 let
   libstraight = epkgs.callPackage ./libstraight.nix { inherit abortOnNotFound epkgs emacs; };
   epkgs =
     if straight == null then
-      emacsPackages.overrideScope' (self: super:
-        { straight = self.callPackage ./straight {  }; })
+      emacsPackages.overrideScope'
+        (self: super:
+          { straight = self.callPackage ./straight { }; })
     else
       emacsPackages;
 
@@ -32,9 +34,12 @@ let
   packageList = override:
     libstraight.parsePackagesJSON (packageJSON.overrideAttrs override);
 
-  emacsEnv = libstraight.emacsEnv { inherit emacsInitFile emacsLoadFiles emacsArgs; };
+  emacsEnv = libstraight.emacsEnv {
+    inherit emacsInitFile emacsLoadFiles emacsArgs;
+  };
 
-in {
+in
+{
   /* Final environment (.emacs.d) with the populated `straight`` repository
 
      The required packages can be acquired from a call to
@@ -74,5 +79,5 @@ in {
      Type: packageJSON :: derivation
 
   */
-  inherit  packageJSON;
+  inherit packageJSON;
 }
